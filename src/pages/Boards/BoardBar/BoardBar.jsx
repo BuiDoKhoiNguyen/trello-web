@@ -9,7 +9,8 @@ import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Button from '@mui/material/Button';
-import { Tooltip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
+import { capitalizeFirstLetter } from '~/utils/formatters';
 
 const MENU_STYLES = {
   color: "white",
@@ -24,7 +25,7 @@ const MENU_STYLES = {
   }
 }
 
-function BoardBar() {
+function BoardBar({ board }){
   return (
     <Box sx={{
       backgroundColor: "#1976d2",
@@ -43,13 +44,13 @@ function BoardBar() {
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <Chip sx={MENU_STYLES}
           icon={<DashboardIcon />}
-          label="MERN Stack tutorial"
+          label={board?.title}
           onClick={() => { }}
         />
 
         <Chip sx={MENU_STYLES}
           icon={<VpnLockIcon />}
-          label="Public/Private WorkSpace"
+          label={capitalizeFirstLetter(board?.type)}
           onClick={() => { }}
         />
 
@@ -117,5 +118,6 @@ function BoardBar() {
     </Box>
   )
 }
+
 
 export default BoardBar;

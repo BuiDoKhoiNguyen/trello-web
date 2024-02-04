@@ -1,5 +1,4 @@
 import { Card as MuiCard } from '@mui/material';
-import PropTypes from 'prop-types';
 import CardMedia from '@mui/material/CardMedia';
 import GroupIcon from '@mui/icons-material/Group';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -9,50 +8,40 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
-function Card({ temporaryHideMedia }) {
-    if (temporaryHideMedia) {
-        return (
-            <MuiCard sx={{
-                cursor: "pointer",
-                boxShadow: "0 1px 1px rgba(0, 0, 0, 0.2)",
-                overflow: "unset",
+function Card({ card }) {
 
-            }}>
-                <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
-                    <Typography>
-                        Card test 01
-                    </Typography>
-                </CardContent>
-            </MuiCard>
-        )
+    const shouldShowCardActions = () => {
+        return !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
     }
+
     return (
         <MuiCard sx={{
             cursor: "pointer",
             boxShadow: "0 1px 1px rgba(0, 0, 0, 0.2)",
             overflow: "unset"
         }}>
-            <CardMedia
-                sx={{ height: 140 }}
-                image="/static/images/cards/contemplative-reptile.jpg"
-                title="green iguana"
-            />
+            {card?.cover && <CardMedia sx={{ height: 140 }} image={card?.cover} />}
+
             <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
                 <Typography>
-                    MERN Stack  
+                    {card?.title}
                 </Typography>
             </CardContent>
-            <CardActions sx={{ p: "0px 4px 8px 4px" }}>
-                <Button size="small" startIcon={<GroupIcon />}>20</Button>
-                <Button size="small" startIcon={<CommentIcon />}>20</Button>
-                <Button size="small" startIcon={<AttachmentIcon />}>20</Button>
-            </CardActions>
+            {shouldShowCardActions() &&
+                <CardActions sx={{ p: "0px 4px 8px 4px" }}>
+                    {!!card?.memberIds?.length &&
+                        <Button size="small" startIcon={<GroupIcon />}>{card?.memberIds?.length}</Button>
+                    }
+                    {!!card?.comments?.length &&
+                        <Button size="small" startIcon={<CommentIcon />}>{card?.comments?.length}</Button>
+                    }
+                    {!!card?.attachments?.length &&
+                        <Button size="small" startIcon={<AttachmentIcon />}>{card?.attachments?.length}</Button>
+                    }
+                </CardActions>
+            }
         </MuiCard>
     )
 }
-
-Card.propTypes = {
-    temporaryHideMedia: PropTypes.bool.isRequired,
-};
 
 export default Card
