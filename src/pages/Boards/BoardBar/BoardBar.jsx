@@ -11,6 +11,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import { capitalizeFirstLetter } from '~/utils/formatters';
+import { Description } from '@mui/icons-material';
 
 const MENU_STYLES = {
   color: "white",
@@ -25,7 +26,7 @@ const MENU_STYLES = {
   }
 }
 
-function BoardBar({ board }){
+function BoardBar({ board }) {
   return (
     <Box sx={{
       backgroundColor: "#1976d2",
@@ -42,11 +43,13 @@ function BoardBar({ board }){
       "&::-webkit-scrollbar-track": { m: 2 }
     }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Chip sx={MENU_STYLES}
-          icon={<DashboardIcon />}
-          label={board?.title}
-          onClick={() => { }}
-        />
+        <Tooltip title={board?.description}>
+          <Chip sx={MENU_STYLES}
+            icon={<DashboardIcon />}
+            label={board?.title}
+            onClick={() => { }}
+          />
+        </Tooltip>
 
         <Chip sx={MENU_STYLES}
           icon={<VpnLockIcon />}
