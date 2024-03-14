@@ -54,8 +54,8 @@ function AppBar() {
           <Templates />
           <Button variant="outlined" startIcon={<LibraryAddIcon />} sx={{ fontWeight: "Bold", color: "white", border: "none", "&:hover": { border: "none" } }} >Create</Button>
         </Box>
-
       </Box>
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: "white" }}>
         <TextField
           id="outlined-search"
@@ -67,15 +67,17 @@ function AppBar() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon  sx={{ color: "white" }} />
+                <SearchIcon sx={{ color: "white" }} />
               </InputAdornment>
             ),
             endAdornment: (
-              <CloseIcon
-                fontSize="Small"
-                sx={{ color: searchValue ? "white" : "transparent", cursor: "pointer" }}
-                onClick={() => setSearchValue("")} 
-              />
+              <InputAdornment position="end">
+                <CloseIcon
+                  fontSize="Small"
+                  sx={{ color: searchValue ? "white" : "transparent", cursor: "pointer" }}
+                  onClick={() => setSearchValue("")}
+                />
+              </InputAdornment>
             )
           }}
           sx={{
@@ -87,9 +89,9 @@ function AppBar() {
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: "white" },
               '&: hover fieldset': { borderColor: "white" },
-              '&.Mui-focused fieldset': { borderColor: "white" }   
+              '&.Mui-focused fieldset': { borderColor: "white" }
             }
-          }} 
+          }}
         />
         <ModeSelect />
 
