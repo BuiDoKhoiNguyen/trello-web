@@ -4,6 +4,7 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Button from '@mui/material/Button'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState } from 'react';
+import { toast } from 'react-toastify'
 import TextField from '@mui/material/TextField';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -15,8 +16,8 @@ function ListColumns({ columns }) {
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
   const addNewColumn = () => {
-    if(!newColumnTitle) {
-      // console.log("Please enter Column Title!")
+    if (!newColumnTitle) {
+      toast.error("Please enter Column Title!")
       return
     }
 
@@ -81,7 +82,7 @@ function ListColumns({ columns }) {
               autoFocus
               value={newColumnTitle}
               onChange={(e) => setNewColumnTitle(e.target.value)}
-             
+
               sx={{
                 '& label': { color: "white" },
                 '& input': { color: "white" },
@@ -105,15 +106,15 @@ function ListColumns({ columns }) {
                   boxShadow: 'none',
                   border: '0.5px solid',
                   borderColor: (theme) => theme.palette.success.main,
-                  '&:hover': { bgcolor: (theme) => theme.palette.success.main}
+                  '&:hover': { bgcolor: (theme) => theme.palette.success.main }
                 }}>
                 Add Column
               </Button>
               <CloseIcon
-                  fontSize="Small"
-                  sx={{ color: "white", cursor: "pointer", '&:hover': { color: (theme) => theme.palette.warning.light } }}
-                  onClick={toggleOpenNewColumnForm}
-                />
+                fontSize="Small"
+                sx={{ color: "white", cursor: "pointer", '&:hover': { color: (theme) => theme.palette.warning.light } }}
+                onClick={toggleOpenNewColumnForm}
+              />
             </Box>
           </Box>
         }
