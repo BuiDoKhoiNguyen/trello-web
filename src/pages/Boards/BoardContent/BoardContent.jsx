@@ -1,11 +1,14 @@
 import Box from '@mui/material/Box';
 import ListColumns from './ListColumns/ListColumns';
 import { mapOrder } from '~/utils/sorts';
-import { DndContext, useSensor, useSensors, DragOverlay, defaultDropAnimationSideEffects, closestCorners, pointerWithin, getFirstCollision } from '@dnd-kit/core';
+import { DndContext, useSensor, useSensors, 
+    DragOverlay, defaultDropAnimationSideEffects, closestCorners, 
+    pointerWithin, getFirstCollision } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { useEffect, useState } from 'react';
-import { cloneDeep } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cloneDeep, isEmpty } from 'lodash';
 import { MouseSensor, TouchSensor } from '~/customLibraries/DndKitSensors';
+import { generatePlaceholderCard } from '~/utils/formatters';
 
 import Column from './ListColumns/Column/Column';
 import Card from './ListColumns/Column/ListCards/Card/Card';
@@ -15,7 +18,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
     CARD: "ACTIVE_DRAG_ITEM_TYPE_CARD"
 }
 
-function BoardContent({ board }) {
+function BoardContent({ board, createNewColumn, createNewCard }) {
     // di chuyen chuot 10px thi ms kich hoat event
     // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
     const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
@@ -29,6 +32,8 @@ function BoardContent({ board }) {
     const [activeDragItemType, setActiveDragItemType] = useState(null)
     const [activeDragItemData, setActiveDragItemData] = useState(null)
     const [oldColumnWhenDraggingCard, setOldColumnWhenDraggingCard] = useState(null)
+
+    const lastOverId = useRef(null)
 
     useEffect(() => {
         setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, "_id"))
@@ -67,6 +72,13 @@ function BoardContent({ board }) {
             if (nextActiveColumn) {
                 //xoa card o column active
                 nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId)
+
+                // add placeholdercard if is empty column
+                if (isEmpty(nextActiveColumn.cards)) {
+                    // console.log("card cuoi cung")
+                    nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+                }
+
                 //cap nhat lai mang cardOrderIds
                 nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
             }
@@ -74,12 +86,21 @@ function BoardContent({ board }) {
             if (nextOverColumn) {
                 //kiem tra xem card dang keo co ton tai o overcolumn chua, neu co thi can xoa no truoc
                 nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId)
+
+                const rebuild_activeDraggingCardData = {
+                    ...activeDraggingCardData,
+                    columnId: nextOverColumn._id
+                }
                 //chan card dang keo vao overcolumn theo vi tri index moi
-                nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, activeDraggingCardData)
+                nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
+
+                // delete holder card when exist at least one card
+                nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_PlaceholderCard)
+
                 //cap nhat lai mang cardOrderIds
                 nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
             }
-
+            // console.log(nextColumns)
             return nextColumns
         })
     }
@@ -218,10 +239,44 @@ function BoardContent({ board }) {
         })
     }
 
+    const collisionDetectionStrategy = useCallback((args) => {
+        if(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+            return closestCorners({ ...args })
+        }
+
+        const pointerIntersections = pointerWithin(args)
+
+        if(!pointerIntersections?.length) return 
+
+        // const intersections = pointerIntersections?.length > 0 ? pointerIntersections : rectIntersection(args)
+
+        let overId = getFirstCollision(pointerIntersections, 'id')
+
+        if(overId) {
+            const checkColumn = orderedColumns.find(column => column._id === overId)
+            
+            if(checkColumn) {
+                // console.log('before',overId)
+                overId = closestCorners({
+                    ...args,
+                    droppableContainers: args.droppableContainers.filter(container => {
+                        return container.id !== overId && checkColumn?.cardOrderIds?.includes(container.id)
+                    })
+                })[0]?.id
+                // console.log('after',overId)
+            }
+
+            lastOverId.current = overId
+            return [{ id: overId }]
+        }
+
+        return lastOverId.current ? [{ id: lastOverId.current }] : []
+    }, [activeDragItemType, orderedColumns])
+
     return (
         <DndContext
-            collisionDetection={closestCorners}
-            // collisionDetection={collisionDetectionStrategy}
+            // collisionDetection={closestCorners}
+            collisionDetection={collisionDetectionStrategy}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDragOver={handleDragOver}
@@ -233,7 +288,11 @@ function BoardContent({ board }) {
                 height: (theme) => (theme.trello.boardContentHeight),
                 p: "10px 0"
             }}>
-                <ListColumns columns={orderedColumns} />
+                <ListColumns 
+                    columns={orderedColumns}
+                    createNewColumn={createNewColumn}
+                    createNewCard={createNewCard}
+                />
                 <DragOverlay dropAnimation={dropAnimation}>
                     {!activeDragItemType && null}
                     {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData} />}

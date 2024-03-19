@@ -25,7 +25,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'react-toastify'
 
 
-function Column({ column }) {
+function Column({ column, createNewCard }) {
     const {
         attributes,
         listeners,
@@ -59,12 +59,18 @@ function Column({ column }) {
 
     const [newCardTitle, setNewCardTitle] = useState('')
 
-    const addNewCard = () => {
+    const addNewCard = async () => {
         if (!newCardTitle) {
-            toast.error("Please enter Card Title!", { position: 'bottom-right'})
+            toast.error("Please enter Card Title!", { position: 'bottom-right' })
             return
         }
 
+        const newCardData = {
+            title: newCardTitle,
+            columnId: column._id
+        }
+
+        await createNewCard(newCardData)
         // console.log()
         //call API
 
