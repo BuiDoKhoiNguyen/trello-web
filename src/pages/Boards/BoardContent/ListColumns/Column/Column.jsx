@@ -21,10 +21,12 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import TextField from '@mui/material/TextField';
 import CloseIcon from '@mui/icons-material/Close';
-import { toast } from 'react-toastify'
+import { toast } from 'react-toastify';
+import { useConfirm } from "material-ui-confirm";
 
 
-function Column({ column, createNewCard }) {
+
+function Column({ column, createNewCard, deleteColumnDetails }) {
     const {
         attributes,
         listeners,
@@ -78,6 +80,23 @@ function Column({ column, createNewCard }) {
         setNewCardTitle('')
     }
 
+    const confirmDeleteColumn = useConfirm()
+    const handleDeleteColumn = () => {
+        confirmDeleteColumn({
+            title: 'Delete Column?',
+            description: 'This action will premanently delete your Column and its Card! Are you sure?',
+            confirmationText: 'Confirm',
+            cancellationText: 'Cancel',
+            // allowClose: false,
+            // dialogProps: { maxWidth: 'xs' },
+            // confirmationButtonProps: { color: 'secondary', variant: 'outlined' },
+            // cancellationButtonProps: { color: 'inherit' },
+            // buttonOrder: ['confirm', 'cancel']
+        }).then(() => {
+            deleteColumnDetails(column._id)
+        }).catch(() => {})
+    }
+
     // bọc div ở ngoài cùng vì vấn đề chiều cao của column khi kéo thả sẽ có bug kiểu flickering
     return (
         <div ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
@@ -124,13 +143,21 @@ function Column({ column, createNewCard }) {
                             anchorEl={anchorEl}
                             open={open}
                             onClose={handleClose}
+                            onClick={handleClose}
                             MenuListProps={{
                                 'aria-labelledby': 'basic-button-column-dropdown',
                             }}
                         >
-                            <MenuItem>
+                            <MenuItem
+                                onClick={toggleOpenNewCardForm} 
+                                sx={{
+                                '&:hover': {
+                                    color: 'success.light',
+                                    '& .add-card-icon': { color: 'success.light' }
+                                }
+                            }}>
                                 <ListItemIcon>
-                                    <AddCardIcon fontSize="small" />
+                                    <AddCardIcon className='add-card-icon' fontSize="small" />
                                 </ListItemIcon>
                                 <ListItemText>Add new card</ListItemText>
                             </MenuItem>
@@ -158,18 +185,25 @@ function Column({ column, createNewCard }) {
 
                             <Divider />
 
-                            <MenuItem>
+                            <MenuItem
+                                onClick={handleDeleteColumn} 
+                                sx={{
+                                '&:hover': {
+                                    color: 'warning.dark',
+                                    '& .delete-forever-icon': { color: 'warning.dark' }
+                                }
+                            }}>
                                 <ListItemIcon>
-                                    <DeleteForeverIcon fontSize="small" />
+                                    <DeleteForeverIcon className="delete-forever-icon" fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>Remove this column</ListItemText>
+                                <ListItemText>Delete this column</ListItemText>
                             </MenuItem>
 
                             <MenuItem>
                                 <ListItemIcon>
                                     <Cloud fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>Web Clipboard</ListItemText>
+                                <ListItemText>Archive this column</ListItemText>
                             </MenuItem>
                         </Menu>
                     </Box>
